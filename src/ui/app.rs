@@ -13,7 +13,8 @@ pub enum AppMsg {
     LoadFile,
     Save,
     Clear,
-    FilePathChanged(String),
+    OpenFilePicker,
+    FileSelected(String),
     TitleChanged(String),
     ArtistChanged(String),
     AlbumChanged(String),
@@ -37,10 +38,10 @@ impl SimpleComponent for App {
                 set_spacing: 8,
                 set_margin_all: 12,
 
-                gtk::Entry {
-                    set_placeholder_text: Some("Enter MP3 file path..."),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::FilePathChanged(e.text().into()));
+                gtk::Button {
+                    set_label: "Search...",
+                    connect_clicked[sender] => move |_| {
+                        sender.input(AppMsg::OpenFilePicker);
                     }
                 },
                 gtk::Button {
@@ -130,8 +131,45 @@ impl SimpleComponent for App {
                     self.metadata = metadata;
                 }
             }
-            AppMsg::FilePathChanged(s) => self.file_path = s,
-            _ => {}
+            AppMsg::Save => {
+                if let Err(e) = write_metadata(&self.file_path, &self.metadata) {
+                    log('E', &format!("Failed to save metadata: {}", e));
+                }
+            }
+            AppMsg::Clear => {
+                if let Err(e) = clear_metadata(&self.file_path) {
+                    log('E', &format!("Failed to clear metadata: {}", e));
+                } else {
+                    self.metadata = Metadata {
+                        title: String::new(),
+                        artist: String::new(),
+                        album: String::new(),
+                        year: String::new(),
+                        genre: String::new(),
+                        comment: String::new(),
+                    };
+                }
+            }
+            AppMsg::OpenFilePicker => {
+                let sender = _sender.clone();
+                relm4::spawn(async move {
+                    if let Some(path) = rfd::AsyncFileDialog::new()
+                        .add_filter("MP3", &["mp3"])
+                        .pick_file()
+                        .await
+                    {
+                        sender.input(AppMsg::FileSelected(
+                            path.path().to_string_lossy().to_string(),
+                        ));
+                    }
+                });
+            }
+            AppMsg::FileSelected(path) => {
+                self.file_path = path;
+                if let Ok(metadata) = read_metadata(&self.file_path) {
+                    self.metadata = metadata;
+                }
+            }
         }
     }
 }

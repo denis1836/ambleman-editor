@@ -31,7 +31,7 @@ impl SimpleComponent for App {
 
     view! {
     gtk::Window {
-            set_title: Some("MP3 Metadata Editor"),
+            set_title: Some("Ambleman Editor"),
             set_default_size: (400, 300),
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,

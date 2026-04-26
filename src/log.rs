@@ -16,6 +16,17 @@ pub fn log(p_ms_type: char, p_message: &str) {
 
     let log_entry = format!("[{}] [{}] {}", timestamp, ms_type, p_message);
 
+    if let Err(e) = std::fs::create_dir_all("./logs") {
+        eprintln!("Couldn't create log directory: {}", e);
+        return;
+    }
+    if !std::fs::File::open(LOG_FILE).is_ok() {
+        if let Err(e) = std::fs::File::create(LOG_FILE) {
+            eprintln!("Couldn't create log file: {}", e);
+            return;
+        }
+    }
+
     let mut file: std::fs::File = std::fs::OpenOptions::new()
         .create(true)
         .append(true)

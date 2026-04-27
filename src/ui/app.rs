@@ -9,19 +9,7 @@ pub struct App {
 }
 
 #[derive(Debug)]
-pub enum AppMsg {
-    LoadFile,
-    Save,
-    Clear,
-    OpenFilePicker,
-    FileSelected(String),
-    TitleChanged(String),
-    ArtistChanged(String),
-    AlbumChanged(String),
-    YearChanged(String),
-    GenreChanged(String),
-    CommentChanged(String),
-}
+pub enum AppMsg {}
 
 #[relm4::component(pub)]
 impl SimpleComponent for App {
@@ -33,72 +21,138 @@ impl SimpleComponent for App {
     gtk::Window {
             set_title: Some("Ambleman Editor"),
             set_default_size: (400, 300),
+            //file picker bar
             gtk::Box {
-                set_orientation: gtk::Orientation::Vertical,
+                set_orientation: gtk::Orientation::Horizontal,
                 set_spacing: 8,
                 set_margin_all: 12,
-
-                gtk::Button {
-                    set_label: "Search...",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::OpenFilePicker);
-                    }
+                gtk::Button{
+                    set_label: "...",
+                    //connect_clicked => {
+                    //}
                 },
-                gtk::Button {
-                    set_label: "Load Metadata",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::LoadFile);
-                    }
-                },
-                gtk::Entry {
-                    set_placeholder_text: Some("Title"),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::TitleChanged(e.text().into()));
-                    }
-                },
-                gtk::Entry {
-                    set_placeholder_text: Some("Artist"),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::ArtistChanged(e.text().into()));
-                    }
-                },
-                gtk::Entry {
-                    set_placeholder_text: Some("Album"),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::AlbumChanged(e.text().into()));
-                    }
-                },
-                gtk::Entry {
-                    set_placeholder_text: Some("Year"),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::YearChanged(e.text().into()));
-                    }
-                },
-                gtk::Entry {
-                    set_placeholder_text: Some("Genre"),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::GenreChanged(e.text().into()));
-                    }
-                },
-                gtk::Entry {
-                    set_placeholder_text: Some("Comment"),
-                    connect_changed[sender] => move |e| {
-                        sender.input(AppMsg::CommentChanged(e.text().into()));
-                    }
-                },
-                gtk::Button {
-                    set_label: "Save",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Save);
-                    }
-                },
-                gtk::Button {
-                    set_label: "Clear",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Clear);
-                    }
-                },
+                gtk::Entry{
+                    set_placeholder_text: Some("Choose a file..."),
+                    //connect_changed => {
+                }
             },
+            //editor fields
+            gtk::Box {
+                //left horizontal box
+                gtk::Box{
+                    //picture box
+                    gtk::Box{
+                        gtk::Image{
+
+                        },
+                        //picture buttons
+                        gtk::Box{
+                            gtk::Button{
+                                set_label: "Delete Picture",
+                                //connect_clicked => {
+                            },
+                            gtk::Button{
+                                set_label: "Choose Picture",
+                                //connect_clicked => {
+                            }
+                        }
+                    },
+                    //track numbers and years
+                    gtk::Box{
+                        gtk::Entry{
+                            set_placeholder_text: Some("Track Number"),
+                            //connect_changed => {
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("Track Total"),
+                            //connect_changed => {
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("Disc Number"),
+                            //connect_changed => {
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("Disk Total"),
+                            //connect_changed => {
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("Year"),
+                            //connect_changed => {
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("Release Year"),
+                            //connect_changed => {
+                        }
+                    },
+                    //lyrics box
+                    gtk::Box{
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_spacing: 8,
+                        set_margin_all: 12,
+                        gtk::Button{
+                            set_label: "...",
+                            //connect_clicked => {
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("Lyrics file..."),
+                            //connect_changed => {
+                        }
+                    },
+                    //save and clear buttons
+                    gtk::Box{
+                        gtk::Button{
+                            set_label: "Save",
+                            //connect_clicked => {
+                            //    write_metadata(&self.file_path, &self.metadata).unwrap();
+                            //}
+                        },
+                        gtk::Button{
+                            set_label: "Clear",
+                            //connect_clicked => {
+                            //    clear_metadata(&self.file_path).unwrap();
+                            //}
+                        }
+                    }
+                },
+                //right horizontal box
+                gtk::Box{
+                    gtk::Label{
+                        set_label: "Title",
+                    },
+                    gtk::Entry{
+                        set_placeholder_text: Some("ex. Fade to Black"),
+                        //connect_changed => {
+                    },
+
+                    gtk::Label{
+                        set_label: "Artist",
+                    },
+                    gtk::Entry{
+                        set_placeholder_text: Some("ex. Metalica"),
+                        //connect_changed => {
+                    },
+                    gtk::Label{
+                        set_label: "Album",
+                    },
+                    gtk::Entry{
+                        set_placeholder_text: Some("ex. Ride the Lightning"),
+                        //connect_changed => {
+                    },
+                    gtk::Label{
+                        set_label: "Genre",
+                    },
+                    gtk::Entry{
+                        set_placeholder_text: Some("ex. Metal"),
+                        //connect_changed => {
+                    },
+                    gtk::Label{
+                        set_label: "Comment",
+                    },
+                    gtk::TextView{
+                        //connect_changed => {
+                    }
+                }
+            }
         }
     }
 
@@ -119,58 +173,7 @@ impl SimpleComponent for App {
     }
 
     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
-        match msg {
-            AppMsg::TitleChanged(s) => self.metadata.title = s,
-            AppMsg::ArtistChanged(s) => self.metadata.artist = s,
-            AppMsg::AlbumChanged(s) => self.metadata.album = s,
-            AppMsg::YearChanged(s) => self.metadata.year = s,
-            AppMsg::GenreChanged(s) => self.metadata.genre = s,
-            AppMsg::CommentChanged(s) => self.metadata.comment = s,
-            AppMsg::LoadFile => {
-                if let Ok(metadata) = read_metadata(&self.file_path) {
-                    self.metadata = metadata;
-                }
-            }
-            AppMsg::Save => {
-                if let Err(e) = write_metadata(&self.file_path, &self.metadata) {
-                    log('E', &format!("Failed to save metadata: {}", e));
-                }
-            }
-            AppMsg::Clear => {
-                if let Err(e) = clear_metadata(&self.file_path) {
-                    log('E', &format!("Failed to clear metadata: {}", e));
-                } else {
-                    self.metadata = Metadata {
-                        title: String::new(),
-                        artist: String::new(),
-                        album: String::new(),
-                        year: String::new(),
-                        genre: String::new(),
-                        comment: String::new(),
-                    };
-                }
-            }
-            AppMsg::OpenFilePicker => {
-                let sender = _sender.clone();
-                relm4::spawn(async move {
-                    if let Some(path) = rfd::AsyncFileDialog::new()
-                        .add_filter("MP3", &["mp3"])
-                        .pick_file()
-                        .await
-                    {
-                        sender.input(AppMsg::FileSelected(
-                            path.path().to_string_lossy().to_string(),
-                        ));
-                    }
-                });
-            }
-            AppMsg::FileSelected(path) => {
-                self.file_path = path;
-                if let Ok(metadata) = read_metadata(&self.file_path) {
-                    self.metadata = metadata;
-                }
-            }
-        }
+        match msg {}
     }
 }
 

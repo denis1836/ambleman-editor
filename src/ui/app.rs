@@ -160,12 +160,19 @@ impl SimpleComponent for App {
         let model = App {
             file_path: String::new(),
             metadata: Metadata {
-                title: String::new(),
-                artist: String::new(),
-                album: String::new(),
-                year: String::new(),
-                genre: String::new(),
-                comment: String::new(),
+                title: None,
+                artist: None,
+                album: None,
+                year: None,
+                genre: None,
+                comment: None,
+                track: None,
+                total_tracks: None,
+                disc: None,
+                total_discs: None,
+                release_date: None,
+                lyrics: None,
+                cover: None,
             },
         };
         let widgets = view_output!();

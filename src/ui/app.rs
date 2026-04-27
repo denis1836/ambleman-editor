@@ -1,7 +1,10 @@
 use crate::log::log;
 use crate::metadata::{Metadata, clear_metadata, read_metadata, write_metadata};
 use gtk::prelude::*;
-use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent, gtk};
+use relm4::gtk::subclass::dialog;
+use relm4::{
+    ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, Sender, SimpleComponent, gtk,
+};
 
 pub struct App {
     metadata: Metadata,
@@ -9,7 +12,12 @@ pub struct App {
 }
 
 #[derive(Debug)]
-pub enum AppMsg {}
+pub enum AppMsg {
+    Save,
+    SaveConfirmed,
+    Clear,
+    ClearConfirmed,
+}
 
 #[relm4::component(pub)]
 impl SimpleComponent for App {
@@ -20,33 +28,46 @@ impl SimpleComponent for App {
     view! {
     gtk::Window {
             set_title: Some("Ambleman Editor"),
-            set_default_size: (400, 300),
-            //file picker bar
+            set_default_size: (760, 480),
+
             gtk::Box {
-                set_orientation: gtk::Orientation::Horizontal,
-                set_spacing: 8,
-                set_margin_all: 12,
-                gtk::Button{
-                    set_label: "...",
-                    //connect_clicked => {
-                    //}
-                },
-                gtk::Entry{
-                    set_placeholder_text: Some("Choose a file..."),
-                    //connect_changed => {
+                set_orientation: gtk::Orientation::Vertical,
+
+                //file picker bar
+                gtk::Box {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_spacing: 8,
+                    set_margin_all: 12,
+                    gtk::Button{
+                        set_label: "...",
+                        //connect_clicked => {
+                        //}
+                    },
+                    gtk::Entry{
+                        set_placeholder_text: Some("Choose a file..."),
+                        //connect_changed => {
+                    }
                 }
             },
             //editor fields
             gtk::Box {
                 //left horizontal box
                 gtk::Box{
+                    set_orientation: gtk::Orientation::Vertical,
+                    set_spacing: 8,
                     //picture box
                     gtk::Box{
+                        set_orientation: gtk::Orientation::Vertical,
+                        set_spacing: 8,
                         gtk::Image{
-
+                            set_size_request: (200, 200),
+                            set_icon_name: Some("image-missing"),
                         },
                         //picture buttons
                         gtk::Box{
+                            set_orientation: gtk::Orientation::Horizontal,
+                            set_spacing: 8,
+                            set_margin_all: 12,
                             gtk::Button{
                                 set_label: "Delete Picture",
                                 //connect_clicked => {
@@ -59,29 +80,46 @@ impl SimpleComponent for App {
                     },
                     //track numbers and years
                     gtk::Box{
-                        gtk::Entry{
-                            set_placeholder_text: Some("Track Number"),
-                            //connect_changed => {
+                        set_orientation: gtk::Orientation::Vertical,
+                        set_spacing: 8,
+                        gtk::Box{
+                            set_orientation: gtk::Orientation::Horizontal,
+                            set_spacing: 8,
+
+                            gtk::Entry{
+                                set_placeholder_text: Some("Track Number"),
+                                //connect_changed => {
+                            },
+                            gtk::Entry{
+                                set_placeholder_text: Some("Track Total"),
+                                //connect_changed => {
+                            }
                         },
-                        gtk::Entry{
-                            set_placeholder_text: Some("Track Total"),
-                            //connect_changed => {
+                        gtk::Box{
+                            set_orientation: gtk::Orientation::Horizontal,
+                            set_spacing: 8,
+
+                            gtk::Entry{
+                                set_placeholder_text: Some("Disc Number"),
+                                //connect_changed => {
+                            },
+                            gtk::Entry{
+                                set_placeholder_text: Some("Disk Total"),
+                                //connect_changed => {
+                            }
                         },
-                        gtk::Entry{
-                            set_placeholder_text: Some("Disc Number"),
-                            //connect_changed => {
-                        },
-                        gtk::Entry{
-                            set_placeholder_text: Some("Disk Total"),
-                            //connect_changed => {
-                        },
-                        gtk::Entry{
-                            set_placeholder_text: Some("Year"),
-                            //connect_changed => {
-                        },
-                        gtk::Entry{
-                            set_placeholder_text: Some("Release Year"),
-                            //connect_changed => {
+                        gtk::Box{
+                            set_orientation: gtk::Orientation::Horizontal,
+                            set_spacing: 8,
+
+                            gtk::Entry{
+                                set_placeholder_text: Some("Year"),
+                                //connect_changed => {
+                            },
+                            gtk::Entry{
+                                set_placeholder_text: Some("Release Year"),
+                                //connect_changed => {
+                            }
                         }
                     },
                     //lyrics box
@@ -100,6 +138,9 @@ impl SimpleComponent for App {
                     },
                     //save and clear buttons
                     gtk::Box{
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_spacing: 8,
+                        set_margin_all: 12,
                         gtk::Button{
                             set_label: "Save",
                             //connect_clicked => {
@@ -108,48 +149,78 @@ impl SimpleComponent for App {
                         },
                         gtk::Button{
                             set_label: "Clear",
-                            //connect_clicked => {
-                            //    clear_metadata(&self.file_path).unwrap();
-                            //}
+                            connect_clicked => {AppMsg::Clear},
                         }
                     }
                 },
-                //right horizontal box
+                //right vertical box
                 gtk::Box{
-                    gtk::Label{
-                        set_label: "Title",
+                    set_orientation: gtk::Orientation::Vertical,
+                    set_spacing: 8,
+                    set_margin_all: 12,
+                    gtk::Box{
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_spacing: 8,
+                        gtk::Label{
+                            set_label: "Title",
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("ex. Fade to Black"),
+                            //connect_changed => {
+                        },
                     },
-                    gtk::Entry{
-                        set_placeholder_text: Some("ex. Fade to Black"),
-                        //connect_changed => {
+                    gtk::Box{
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_spacing: 8,
+                        gtk::Label{
+                            set_label: "Artist",
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("ex. Metalica"),
+                            //connect_changed => {
+                        },
                     },
-
-                    gtk::Label{
-                        set_label: "Artist",
+                    gtk::Box{
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_spacing: 8,
+                        gtk::Label{
+                            set_label: "Album",
+                        },
+                        gtk::Entry{
+                            set_placeholder_text: Some("ex. Ride the Lightning"),
+                            //connect_changed => {
+                        },
                     },
-                    gtk::Entry{
-                        set_placeholder_text: Some("ex. Metalica"),
-                        //connect_changed => {
+                    gtk::Box{
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_spacing: 8,
+                        gtk::Label{
+                            set_label: "Genre",
+                        },
+                        gtk::Box{
+                            set_orientation: gtk::Orientation::Horizontal,
+                            set_spacing: 8,
+                            gtk::Entry{
+                                set_placeholder_text: Some("ex. Metal"),
+                                //connect_changed => {
+                            },
+                            gtk::Image{
+                                set_icon_name: Some("dialog-information-symbolic"),
+                                set_tooltip_text: Some("If you have few genres, separate them with a semicolon."),
+                            }
+                        }
                     },
-                    gtk::Label{
-                        set_label: "Album",
-                    },
-                    gtk::Entry{
-                        set_placeholder_text: Some("ex. Ride the Lightning"),
-                        //connect_changed => {
-                    },
-                    gtk::Label{
-                        set_label: "Genre",
-                    },
-                    gtk::Entry{
-                        set_placeholder_text: Some("ex. Metal"),
-                        //connect_changed => {
-                    },
-                    gtk::Label{
-                        set_label: "Comment",
-                    },
-                    gtk::TextView{
-                        //connect_changed => {
+                    gtk::Box{
+                        set_orientation: gtk::Orientation::Vertical,
+                        set_spacing: 8,
+                        gtk::Label{
+                            set_label: "Comment",
+                            set_align: gtk::Align::Start,
+                        },
+                        gtk::TextView{
+                            set_size_request: (200, 130),
+                            //connect_changed => {
+                        }
                     }
                 }
             }
@@ -180,7 +251,20 @@ impl SimpleComponent for App {
     }
 
     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
-        match msg {}
+        match msg {
+            AppMsg::Save => {
+                //TODO: confirmation window
+            }
+            AppMsg::Clear => {
+                //TODO: confirmation window
+            }
+            AppMsg::SaveConfirmed => {
+                write_metadata(&self.file_path, &self.metadata).expect("Failed to write metadata");
+            }
+            AppMsg::ClearConfirmed => {
+                clear_metadata(&self.file_path).expect("Failed to clear metadata");
+            }
+        }
     }
 }
 

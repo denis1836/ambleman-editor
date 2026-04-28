@@ -1,5 +1,5 @@
 use crate::log::log;
-use crate::metadata::{Metadata, clear_metadata, read_metadata, write_metadata};
+use crate::metadata::{self, Metadata, clear_metadata, read_metadata, write_metadata};
 use gtk::prelude::*;
 use relm4::gtk::subclass::dialog;
 use relm4::{
@@ -13,6 +13,7 @@ pub struct App {
 
 #[derive(Debug)]
 pub enum AppMsg {
+    OpenFilePicker,
     Save,
     SaveConfirmed,
     Clear,
@@ -27,11 +28,16 @@ impl SimpleComponent for App {
 
     view! {
     gtk::Window {
-            set_title: Some("Ambleman Editor"),
-            set_default_size: (760, 480),
+        set_title: Some("Ambleman Editor"),
+        set_default_size: (760, 480),
 
+        //app
+        gtk::Box{
+            set_orientation: gtk::Orientation::Vertical,
+            //file picker box
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
+                set_size_request: (760, 480),
 
                 //file picker bar
                 gtk::Box {
@@ -40,8 +46,9 @@ impl SimpleComponent for App {
                     set_margin_all: 12,
                     gtk::Button{
                         set_label: "...",
-                        //connect_clicked => {
-                        //}
+                        connect_clicked[sender] => move |_| {
+                            sender.input(AppMsg::OpenFilePicker);
+                        }
                     },
                     gtk::Entry{
                         set_placeholder_text: Some("Choose a file..."),
@@ -166,6 +173,7 @@ impl SimpleComponent for App {
                         },
                         gtk::Entry{
                             set_placeholder_text: Some("ex. Fade to Black"),
+                            set_text: "",
                             //connect_changed => {
                         },
                     },
@@ -179,6 +187,10 @@ impl SimpleComponent for App {
                             set_placeholder_text: Some("ex. Metalica"),
                             //connect_changed => {
                         },
+                        gtk::Image{
+                            set_icon_name: Some("dialog-information-symbolic"),
+                            set_tooltip_text: Some("If there are few artists, separate them with a semicolon."),
+                        }
                     },
                     gtk::Box{
                         set_orientation: gtk::Orientation::Horizontal,
@@ -206,7 +218,7 @@ impl SimpleComponent for App {
                             },
                             gtk::Image{
                                 set_icon_name: Some("dialog-information-symbolic"),
-                                set_tooltip_text: Some("If you have few genres, separate them with a semicolon."),
+                                set_tooltip_text: Some("If there are few genres, separate them with a semicolon."),
                             }
                         }
                     },
@@ -223,6 +235,7 @@ impl SimpleComponent for App {
                         }
                     }
                 }
+            }
             }
         }
     }
@@ -252,6 +265,7 @@ impl SimpleComponent for App {
 
     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
         match msg {
+            AppMsg::OpenFilePicker => {}
             AppMsg::Save => {
                 //TODO: confirmation window
             }

@@ -13,7 +13,24 @@ pub struct App {
 
 #[derive(Debug)]
 pub enum AppMsg {
+    //top file picker bar
     OpenFilePicker,
+    SongFilePathChanged(String),
+    //right ui side
+    TitleChanged(String),
+    ArtistChanged(String),
+    AlbumNameChanged(String),
+    GenreChanged(String),
+    //left ui side
+    DeleteSongCover,
+    ChooseSongCover,
+    TruckNumberChanged(String),
+    TruckNumberTotalChanged(String),
+    DiskNumberChanged(String),
+    DiskNumberTotalChanged(String),
+    OpenLyricsFilePicker,
+    LyricsFilePathChanged(String),
+    //ops buttons
     Save,
     SaveConfirmed,
     Clear,
@@ -37,7 +54,7 @@ impl SimpleComponent for App {
             //file picker box
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
-                set_size_request: (760, 480),
+                set_size_request: (760, 25),
 
                 //file picker bar
                 gtk::Box {
@@ -52,7 +69,9 @@ impl SimpleComponent for App {
                     },
                     gtk::Entry{
                         set_placeholder_text: Some("Choose a file..."),
-                        //connect_changed => {
+                        connect_changed[sender] => move |e| {
+                            sender.input(AppMsg::SongFilePathChanged(e.text().into()));
+                        }
                     }
                 }
             },
@@ -76,12 +95,16 @@ impl SimpleComponent for App {
                             set_spacing: 8,
                             set_margin_all: 12,
                             gtk::Button{
-                                set_label: "Delete Picture",
-                                //connect_clicked => {
+                                set_label: "Delete Cover",
+                                connect_clicked[sender] => move |_| {
+                                    sender.input(AppMsg::DeleteSongCover);
+                                }
                             },
                             gtk::Button{
-                                set_label: "Choose Picture",
-                                //connect_clicked => {
+                                set_label: "Choose Cover",
+                                connect_clicked[sender] => move |_| {
+                                   sender.input(AppMsg::ChooseSongCover);
+                                }
                             }
                         }
                     },
@@ -95,11 +118,15 @@ impl SimpleComponent for App {
 
                             gtk::Entry{
                                 set_placeholder_text: Some("Track Number"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e| {
+                                    sender.input(AppMsg::TruckNumberChanged(e.text().into()));
+                                }
                             },
                             gtk::Entry{
                                 set_placeholder_text: Some("Track Total"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e| {
+                                    sender.input(AppMsg::TruckNumberTotalChanged(e.text().into()));
+                                }
                             }
                         },
                         gtk::Box{
@@ -108,11 +135,15 @@ impl SimpleComponent for App {
 
                             gtk::Entry{
                                 set_placeholder_text: Some("Disc Number"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e|{
+                                    sender.input(AppMsg::DiskNumberChanged(e.text().into()));
+                                }
                             },
                             gtk::Entry{
                                 set_placeholder_text: Some("Disk Total"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e| {
+                                    sender.input(AppMsg::DiskNumberTotalChanged(e.text().into()));
+                                }
                             }
                         },
                         gtk::Box{
@@ -136,11 +167,15 @@ impl SimpleComponent for App {
                         set_margin_all: 12,
                         gtk::Button{
                             set_label: "...",
-                            //connect_clicked => {
+                            connect_clicked[sender] => move |_| {
+                               sender.input(AppMsg::OpenLyricsFilePicker);
+                            }
                         },
                         gtk::Entry{
                             set_placeholder_text: Some("Lyrics file..."),
-                            //connect_changed => {
+                            connect_changed[sender] => move |e| {
+                                sender.input(AppMsg::LyricsFilePathChanged(e.text().into()));
+                            }
                         }
                     },
                     //save and clear buttons
@@ -150,13 +185,11 @@ impl SimpleComponent for App {
                         set_margin_all: 12,
                         gtk::Button{
                             set_label: "Save",
-                            //connect_clicked => {
-                            //    write_metadata(&self.file_path, &self.metadata).unwrap();
-                            //}
+                            connect_clicked => AppMsg::Save
                         },
                         gtk::Button{
                             set_label: "Clear",
-                            connect_clicked => {AppMsg::Clear},
+                            connect_clicked => AppMsg::Clear
                         }
                     }
                 },
@@ -174,7 +207,9 @@ impl SimpleComponent for App {
                         gtk::Entry{
                             set_placeholder_text: Some("ex. Fade to Black"),
                             set_text: "",
-                            //connect_changed => {
+                            connect_changed[sender] => move |e| {
+                                sender.input(AppMsg::TitleChanged(e.text().into()));
+                            }
                         },
                     },
                     gtk::Box{
@@ -185,7 +220,9 @@ impl SimpleComponent for App {
                         },
                         gtk::Entry{
                             set_placeholder_text: Some("ex. Metalica"),
-                            //connect_changed => {
+                            connect_changed[sender] => move |e| {
+                                sender.input(AppMsg::ArtistChanged(e.text().into()));
+                            }
                         },
                         gtk::Image{
                             set_icon_name: Some("dialog-information-symbolic"),
@@ -200,7 +237,9 @@ impl SimpleComponent for App {
                         },
                         gtk::Entry{
                             set_placeholder_text: Some("ex. Ride the Lightning"),
-                            //connect_changed => {
+                            connect_changed[sender] => move |e| {
+                                sender.input(AppMsg::AlbumNameChanged(e.text().into()));
+                            }
                         },
                     },
                     gtk::Box{
@@ -214,7 +253,9 @@ impl SimpleComponent for App {
                             set_spacing: 8,
                             gtk::Entry{
                                 set_placeholder_text: Some("ex. Metal"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e| {
+                                    sender.input(AppMsg::GenreChanged(e.text().into()));
+                                }
                             },
                             gtk::Image{
                                 set_icon_name: Some("dialog-information-symbolic"),
@@ -265,7 +306,38 @@ impl SimpleComponent for App {
 
     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
         match msg {
+            //top file picking bar
             AppMsg::OpenFilePicker => {}
+            AppMsg::SongFilePathChanged(s) => {
+                self.file_path = s;
+            }
+
+            //right ui side
+            AppMsg::TitleChanged(s) => {
+                self.metadata.title = Some(s);
+            }
+            AppMsg::ArtistChanged(s) => {
+                self.metadata.artist = Some(s);
+            }
+            AppMsg::AlbumNameChanged(s) => {
+                self.metadata.album = Some(s);
+            }
+            AppMsg::GenreChanged(s) => {
+                //TODO (metadata.rs) multiple artists adding
+                self.metadata.genre = Some(s);
+            }
+
+            //left ui side
+            AppMsg::DiskNumberChanged(s) => {
+                let num = s.as_str().parse::<u32>().unwrap();
+                self.metadata.disc = Some(num);
+            }
+            AppMsg::DiskNumberTotalChanged(s) => {
+                let num = s.as_str().parse::<u32>().unwrap();
+                self.metadata.total_discs = Some(num);
+            }
+
+            //bottom func buttons
             AppMsg::Save => {
                 //TODO: confirmation window
             }

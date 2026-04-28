@@ -50,6 +50,7 @@ pub fn write_metadata(file: &str, metadata: &Metadata) -> Result<(), id3::Error>
             .map(|s| s.as_str())
             .unwrap_or("null"),
     );
+    //TODO: adding multiple artists
     tag.set_artist(
         metadata
             .artist
@@ -109,7 +110,7 @@ pub fn read_metadata(file: &str) -> Result<Metadata, id3::Error> {
         title: tag.title().as_ref().map(|s| s.to_string()),
         artist: tag.artist().as_ref().map(|s| s.to_string()),
         album: tag.album().as_ref().map(|s| s.to_string()),
-        year: tag.year().map(|y| y as u32).or_else(|| Some(0)),
+        year: tag.year().map(|y: i32| y as u32).or_else(|| Some(0)),
         genre: tag.genre().as_ref().map(|s| s.to_string()),
         comment: tag.comments().next().map(|c| c.text.clone()),
         track: tag.track().or_else(|| Some(0)),

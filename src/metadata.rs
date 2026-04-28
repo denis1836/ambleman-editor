@@ -124,3 +124,19 @@ pub fn read_metadata(file: &str) -> Result<Metadata, id3::Error> {
 
     Ok(metadata)
 }
+
+pub fn debug_metada(metadata: &Metadata) {
+    println!("TITLE: {:?}", metadata.title);
+    println!("ARTIST: {:?}", metadata.artist);
+    println!("ALBUM: {:?}", metadata.album);
+    println!("YEAR: {:?}", metadata.year);
+    println!("GENRE: {:?}", metadata.genre);
+    println!("TRACK NUM: {:?}", metadata.track);
+    println!("TOTAL T NUM: {:?}", metadata.total_tracks);
+    println!("DISC NUM: {:?}", metadata.disc);
+    println!("TOTAL D NUM: {:?}", metadata.total_discs);
+    println!("TRACK R DATE: {:?}", metadata.release_date);
+    println!("COMMENT: {:?}", metadata.comment);
+    println!("LYTICS: {:?}", metadata.lyrics);
+    println!("COVER: {:?}", metadata.cover);
+}

@@ -1,7 +1,7 @@
 use crate::log::log;
-use crate::metadata::{self, Metadata, clear_metadata, read_metadata, write_metadata};
+use crate::metadata::{Metadata, clear_metadata, debug_metada, read_metadata, write_metadata};
 use gtk::prelude::*;
-use relm4::gtk::subclass::dialog;
+use id3::Timestamp;
 use relm4::{
     ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, Sender, SimpleComponent, gtk,
 };
@@ -21,9 +21,12 @@ pub enum AppMsg {
     ArtistChanged(String),
     AlbumNameChanged(String),
     GenreChanged(String),
+    CommentChanged(String),
     //left ui side
     DeleteSongCover,
     ChooseSongCover,
+    YearChanged(String),
+    ReleaseDateChanged(String),
     TruckNumberChanged(String),
     TruckNumberTotalChanged(String),
     DiskNumberChanged(String),
@@ -152,11 +155,15 @@ impl SimpleComponent for App {
 
                             gtk::Entry{
                                 set_placeholder_text: Some("Year"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e| {
+                                    sender.input(AppMsg::YearChanged(e.text().into()));
+                                }
                             },
                             gtk::Entry{
                                 set_placeholder_text: Some("Release Year"),
-                                //connect_changed => {
+                                connect_changed[sender] => move |e| {
+                                    sender.input(AppMsg::ReleaseDateChanged(e.text().into()));
+                                }
                             }
                         }
                     },
@@ -270,9 +277,10 @@ impl SimpleComponent for App {
                             set_label: "Comment",
                             set_align: gtk::Align::Start,
                         },
-                        gtk::TextView{
+                        gtk::TextView {
                             set_size_request: (200, 130),
-                            //connect_changed => {
+
+                            //TODO: detecting if the comment has changed
                         }
                     }
                 }
@@ -305,6 +313,8 @@ impl SimpleComponent for App {
     }
 
     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
+        debug_metada(&self.metadata); //DEBUG FUNC
+
         match msg {
             //top file picking bar
             AppMsg::OpenFilePicker => {}
@@ -326,15 +336,52 @@ impl SimpleComponent for App {
                 //TODO (metadata.rs) multiple artists adding
                 self.metadata.genre = Some(s);
             }
-
+            AppMsg::CommentChanged(s) => {
+                self.metadata.comment = Some(s);
+            }
             //left ui side
+            AppMsg::YearChanged(s) => {
+                let num: u32 = s.as_str().parse::<u32>().unwrap();
+                self.metadata.year = Some(num);
+            }
+            AppMsg::ReleaseDateChanged(s) => {
+                let date: Timestamp = s.as_str().parse::<Timestamp>().unwrap();
+                self.metadata.release_date = Some(date);
+            }
+
             AppMsg::DiskNumberChanged(s) => {
+                //TODO: non-number chars blocking
                 let num = s.as_str().parse::<u32>().unwrap();
                 self.metadata.disc = Some(num);
             }
             AppMsg::DiskNumberTotalChanged(s) => {
+                //TODO: non-number chars blocking
                 let num = s.as_str().parse::<u32>().unwrap();
                 self.metadata.total_discs = Some(num);
+            }
+
+            AppMsg::TruckNumberChanged(s) => {
+                //TODO: non-number chars blocking
+                let num = s.as_str().parse::<u32>().unwrap();
+                self.metadata.track = Some(num);
+            }
+            AppMsg::TruckNumberTotalChanged(s) => {
+                //TODO: non-number chars blocking
+                let num = s.as_str().parse::<u32>().unwrap();
+                self.metadata.total_tracks = Some(num);
+            }
+
+            AppMsg::ChooseSongCover => {
+                //TODO: open file picker to choose the cover file
+            }
+            AppMsg::DeleteSongCover => {
+                //TODO: delete song cover
+            }
+
+            AppMsg::OpenLyricsFilePicker => {}
+            AppMsg::LyricsFilePathChanged(s) => {
+                let file_path = s;
+                //TODO: get lyrics from file
             }
 
             //bottom func buttons
@@ -345,9 +392,11 @@ impl SimpleComponent for App {
                 //TODO: confirmation window
             }
             AppMsg::SaveConfirmed => {
+                log('I', &format!("Writing metada to: {}", self.file_path));
                 write_metadata(&self.file_path, &self.metadata).expect("Failed to write metadata");
             }
             AppMsg::ClearConfirmed => {
+                log('I', &format!("Clearing metada for: {}", self.file_path));
                 clear_metadata(&self.file_path).expect("Failed to clear metadata");
             }
         }
